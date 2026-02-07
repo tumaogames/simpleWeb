@@ -5,7 +5,9 @@ using NativeWebSocket;
 #endif
 using System.Collections;
 using System.Collections.Generic;
+#if !UNITY_WEBGL || UNITY_EDITOR
 using Unity.WebRTC;
+#endif
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Rendering;
@@ -88,8 +90,10 @@ namespace SimpleWebRTC {
         public UnityEvent AudioTransmissionReceived;
 
         private WebRTCManager webRTCManager;
+#if !UNITY_WEBGL || UNITY_EDITOR
         private VideoStreamTrack videoStreamTrack;
         private AudioStreamTrack audioStreamTrack;
+#endif
         private string activeMicrophoneDevice;
 
         private RenderTexture cubemapLeftEye;
@@ -169,10 +173,12 @@ namespace SimpleWebRTC {
             CreateVideoReceiver();
             CreateAudioReceiver();
             DestroyCachedGameObjects();
+#if !UNITY_WEBGL || UNITY_EDITOR
             StartWebRTCUpdate();
             StopWebRTCUpdate();
             CreateOffer();
             CreateAnswer();
+#endif
 
             if (stopAllCoroutines) {
                 stopAllCoroutines = false;
@@ -236,6 +242,7 @@ namespace SimpleWebRTC {
             }
         }
 
+        #if !UNITY_WEBGL || UNITY_EDITOR
         private void LateUpdate() {
             if (UseImmersiveSetup && IsVideoAudioSender) {
                 if (OneFacePerFrame) {
@@ -260,6 +267,7 @@ namespace SimpleWebRTC {
                 }
             }
         }
+        #endif
 
         private void OnEnable() {
             ConnectClient();
@@ -388,10 +396,17 @@ namespace SimpleWebRTC {
         }
 
         public void StartVideoTransmission() {
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            webRTCManager.StartVideoTransmission();
+            StartStopVideoTransmission = true;
+            IsVideoTransmissionActive = true;
+            #else
             StopCoroutine(StartVideoTransmissionAsync());
             StartCoroutine(StartVideoTransmissionAsync());
+            #endif
         }
 
+        #if !UNITY_WEBGL || UNITY_EDITOR
         private IEnumerator StartVideoTransmissionAsync() {
 
             StreamingCamera.gameObject.SetActive(true);
@@ -415,9 +430,14 @@ namespace SimpleWebRTC {
             StartStopVideoTransmission = true;
             IsVideoTransmissionActive = true;
         }
+        #endif
 
         public void StopVideoTransmission() {
-
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            webRTCManager.StopVideoTransmission();
+            StartStopVideoTransmission = false;
+            IsVideoTransmissionActive = false;
+            #else
             StopCoroutine(StartVideoTransmissionAsync());
 
             StreamingCamera.gameObject.SetActive(false);
@@ -430,13 +450,21 @@ namespace SimpleWebRTC {
 
             StartStopVideoTransmission = false;
             IsVideoTransmissionActive = false;
+            #endif
         }
 
         public void StartAudioTransmission() {
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            webRTCManager.StartAudioTransmission();
+            StartStopAudioTransmission = true;
+            IsAudioTransmissionActive = true;
+            #else
             StopCoroutine(StartAudioTransmissionAsync());
             StartCoroutine(StartAudioTransmissionAsync());
+            #endif
         }
 
+        #if !UNITY_WEBGL || UNITY_EDITOR
         private IEnumerator StartAudioTransmissionAsync() {
 
             StopCoroutine(StartAudioTransmissionAsync());
@@ -500,9 +528,14 @@ namespace SimpleWebRTC {
             StartStopAudioTransmission = true;
             IsAudioTransmissionActive = true;
         }
+        #endif
 
         public void StopAudioTransmission() {
-
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            webRTCManager.StopAudioTransmission();
+            StartStopAudioTransmission = false;
+            IsAudioTransmissionActive = false;
+            #else
             StreamingAudioSource.Stop();
             StreamingAudioSource.gameObject.SetActive(IsAudioTransmissionActive);
             if (UseMicrophone && !string.IsNullOrEmpty(activeMicrophoneDevice)) {
@@ -519,6 +552,7 @@ namespace SimpleWebRTC {
 
             StartStopAudioTransmission = false;
             IsAudioTransmissionActive = false;
+            #endif
         }
 
         public void CreateVideoReceiverGameObject(string senderPeerId) {
@@ -588,24 +622,29 @@ namespace SimpleWebRTC {
             createAnswer = true;
         }
 
+#if !UNITY_WEBGL || UNITY_EDITOR
         private void CreateAnswer() {
             if (createAnswer) {
                 createAnswer = false;
                 StartCoroutine(webRTCManager.CreateAnswer(answerSenderPeerId, answerJson));
             }
         }
+#endif
 
         public void CreateOfferCoroutine() {
             createOffer = true;
         }
 
+#if !UNITY_WEBGL || UNITY_EDITOR
         private void CreateOffer() {
             if (createOffer) {
                 createOffer = false;
                 StartCoroutine(webRTCManager.CreateOffer());
             }
         }
+#endif
 
+#if !UNITY_WEBGL || UNITY_EDITOR
         private void StartWebRTCUpdate() {
             if (startWebRTCUpdate) {
                 startWebRTCUpdate = false;
@@ -619,6 +658,7 @@ namespace SimpleWebRTC {
                 StopCoroutine(WebRTC.Update());
             }
         }
+#endif
 
         public void StartWebRTUpdateCoroutine() {
             startWebRTCUpdate = true;

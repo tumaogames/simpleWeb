@@ -1,3 +1,4 @@
+#if (!UNITY_WEBGL || UNITY_EDITOR)
 #if !USE_NATIVEWEBSOCKET
 using Meta.Net.NativeWebSocket;
 #else
@@ -584,3 +585,4 @@ namespace SimpleWebRTC {
         }
     }
 }
+#endif

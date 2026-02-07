@@ -1,3 +1,4 @@
+#if (!UNITY_WEBGL || UNITY_EDITOR)
 using System.Collections;
 using System.Text;
 using Unity.WebRTC;
@@ -316,3 +317,4 @@ namespace SimpleWebRTC {
         }
     }
 }
+#endif

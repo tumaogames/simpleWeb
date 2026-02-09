@@ -33,13 +33,11 @@ namespace SimpleWebRTC {
             manager?.HandleRemoteVideo(peerId);
         }
 
-        public void WebGL_OnLog(string message) {
-            SimpleWebRTCLogger.Log(message);
-        }
+        // Keep these callbacks for compatibility with older builds.
+        // Logging from JS back into Unity can create recursive logging paths in WebGL.
+        public void WebGL_OnLog(string message) { }
 
-        public void WebGL_OnError(string message) {
-            SimpleWebRTCLogger.LogError(message);
-        }
+        public void WebGL_OnError(string message) { }
     }
 }
 #endif
